@@ -1,115 +1,103 @@
-import { ProductCart } from "../types";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "../contexts/CartContext";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "../components/ui/popover";
 
-type propsHeader = {
-  carrito: ProductCart[];
-  handleDelete: (item: ProductCart) => void;
-  incrementarItem: (id: number) => void;
-  decrementarItem: (id: number) => void;
-  deleteAll: () => void;
-  isEmpty: boolean;
-  carTotal: number;
-};
+export const Header = () => {
+  const { state, dispatch, totalItems, totalPrice } = useCart();
 
-export const Header = ({
-  carrito,
-  handleDelete,
-  incrementarItem,
-  decrementarItem,
-  deleteAll,
-  isEmpty,
-  carTotal,
-}: propsHeader) => {
   return (
-    <header className="py-5 header">
-      <div className="container-xl">
-        <div className="row justify-content-center justify-content-md-between">
-          <div className="col-8 col-md-3">
-            <a className="portfolio" href="https://www.kodedev.tech/">
-              Portfolio
-            </a>
-          </div>
-          <nav className="col-md-6 a mt-5 d-flex align-items-start justify-content-end">
-            <div className="carrito">
-              <img
-                className="img-fluid"
-                src="/img/carrito.png"
-                alt="imagen carrito"
-              />
+    <header className="bg-gradient-to-r from-black/40 to-black/0 py-6 px-8 sticky top-0 z-30 backdrop-blur-sm outline">
+      <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between">
+        <a
+          href="https://www.kodedev.tech/"
+          className="lg:text-3xl font-black text-brand"
+        >
+          Portfolio
+        </a>
 
-              <div id="carrito" className="bg-white p-3">
-                {isEmpty ? (
-                  <p className="text-center">El carrito esta vacio</p>
-                ) : (
-                  <>
-                    <table className="w-100 table">
-                      <thead>
-                        <tr>
-                          <th>Imagen</th>
-                          <th>Nombre</th>
-                          <th>Precio</th>
-                          <th>Cantidad</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {carrito.map((guitar) => (
-                          <tr key={guitar.id}>
-                            <td>
-                              <img
-                                className="img-fluid"
-                                src={`img/${guitar.image}.webp`}
-                                alt="imagen guitarra"
-                              />
-                            </td>
-                            <td>{guitar.name}</td>
-                            <td className="fw-bold">{guitar.price}</td>
-                            <td className="flex align-items-start gap-4">
-                              <button
-                                onClick={() => decrementarItem(guitar.id)}
-                                type="button"
-                                className="btn btn-dark"
-                              >
-                                -
-                              </button>
-                              {guitar.cantidad}
-                              <button
-                                onClick={() => incrementarItem(guitar.id)}
-                                type="button"
-                                className="btn btn-dark"
-                              >
-                                +
-                              </button>
-                            </td>
-                            <td>
-                              <button
-                                onClick={() => handleDelete(guitar)}
-                                className="btn btn-danger"
-                                type="button"
-                              >
-                                X
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <p className="text-end">
-                      pagar: <span className="fw-bold"></span>
-                      {carTotal}
-                    </p>
-                  </>
-                )}
+        {/* CART */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="relative ">
+              <ShoppingCart
+                className="w-5 h-5
+                  sm:w-6 sm:h-6
+                  md:w-7 md:h-7
+                  lg:w-9 lg:h-9 "
+              />
+              {totalItems > 0 && (
+                <span className="absolute -right-2 -top-3 w-5 h-5 rounded-full bg-brand text-xs text-black grid place-content-center animate-pulse">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          </PopoverTrigger>
+
+          <PopoverContent className="w-80">
+            {state.items.length === 0 ? (
+              <p className="text-center py-4">El carrito está vacío</p>
+            ) : (
+              <>
+                <ul className="divide-y">
+                  {state.items.map(({ id, image, name, price, cantidad }) => (
+                    <li key={id} className="flex gap-3 py-2">
+                      <img
+                        src={`img/${image}.webp`}
+                        className="w-12 h-12 object-cover"
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium">{name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {cantidad} × {format(price)}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => dispatch({ type: "INC", payload: id })}
+                        >
+                          ＋
+                        </button>
+                        <button
+                          onClick={() => dispatch({ type: "DEC", payload: id })}
+                        >
+                          −
+                        </button>
+                      </div>
+                      <button
+                        className="ml-2 text-red-600"
+                        onClick={() =>
+                          dispatch({ type: "REMOVE", payload: id })
+                        }
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="text-right mt-4 font-bold">
+                  {format(totalPrice)}
+                </p>
                 <button
-                  onClick={deleteAll}
-                  className="btn btn-dark w-100 mt-3 p-2"
+                  className="btn btn-dark w-full mt-3"
+                  onClick={() => dispatch({ type: "CLEAR" })}
                 >
-                  Vaciar Carrito
+                  Vaciar carrito
                 </button>
-              </div>
-            </div>
-          </nav>
-        </div>
+              </>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );
 };
+
+const format = (n: number) =>
+  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(
+    n
+  );
