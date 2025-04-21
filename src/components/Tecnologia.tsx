@@ -22,7 +22,7 @@ const {name, description, price} = producto
                     <p className="fw-black text-primary fs-3">{price}€</p>
                     <button onClick={()=>addCart(producto)}
                         type="button"
-                        className="btn btn-dark w-100"
+                        className="btn btn-dark w-20"
                     >Agregar al Carrito</button>
                 </div>
             </div>  
