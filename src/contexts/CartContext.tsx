@@ -63,8 +63,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => localStorage.setItem('cart', JSON.stringify(state.items)), [state]);
 
-  const totalItems = state.items.reduce((acc, i) => acc + i.cantidad, 0);
-  const totalPrice = state.items.reduce((acc, i) => acc + i.cantidad * i.price, 0);
+  const totalItems: number = state.items.reduce((acc: number, i: ProductCart) => acc + i.cantidad, 0);
+  const totalPrice: number = state.items.reduce((acc: number, i: ProductCart) => acc + i.cantidad * i.price, 0);
 
   return (
     <CartContext.Provider value={{ state, dispatch, totalItems, totalPrice }}>
